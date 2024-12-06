@@ -6,11 +6,12 @@ import pandas as pd
 import os
 
 # File paths
-dataset_path = "dataset/genly3k_train.csv"
-num_topics = 512
-lda_model_path = f"models/model{num_topics}/lda{num_topics}.model"
-id2word_path = f"models/model{num_topics}/lda{num_topics}.model.id2word"
-output_path = f"dataset/topics/genly3k_topics{num_topics}.csv"
+dataset_type = "full" # train or test
+dataset_path = f"dataset/genly3k_{dataset_type}.csv"
+num_topics = 128
+lda_model_path = f"models/model{num_topics}_full/lda{num_topics}.model"
+id2word_path = f"models/model{num_topics}_full/lda{num_topics}.model.id2word"
+output_path = f"dataset/topics_{dataset_type}/genly3k_{dataset_type}{num_topics}.csv"
 
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 

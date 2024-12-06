@@ -10,10 +10,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
-num_topics = 2048
+num_topics = 128
 learning_rate = 0.001
 num_epochs = 20
 batch_size = 128
@@ -25,25 +24,25 @@ for size in hidden_sizes:
     layers_text += f"{size}_"
 layers_text = layers_text[:-1]
 
-dataset_path = f'dataset/topics_full/genly3k_full{num_topics}.csv'
-output_path = f'classifiers/official/genre_full{num_topics}-{layers_text}-{timestamp}.pth'
+dataset_path = f'dataset/topics_train/genly3k_train{num_topics}.csv'
+output_path = f'classifiers/official/genre_partial{num_topics}-{layers_text}-{timestamp}.pth'
 # val_output_path = f'classifiers/genre{num_topics}_{layers_text}_{timestamp}_val.csv'
-# test_set_path = f'dataset/topics_test/genly3k_test{num_topics}.csv'
+test_set_path = f'dataset/topics_test/genly3k_test{num_topics}.csv'
 
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
 # Load the dataset
 dataset = LyricsDataset(csv_file=dataset_path)
 
-# Test set: This is kind of awkward because it's a retroactive choice
-train_size = int(0.8 * len(dataset))
-test_size = len(dataset) - train_size
-remain_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+# # Test set: This is kind of awkward because it's a retroactive choice
+# train_size = int(0.8 * len(dataset))
+# test_size = len(dataset) - train_size
+# remain_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
 # Split the dataset into training and validation sets (e.g., 80% train, 20% val)
-train_size = int(0.8 * len(remain_dataset))
-val_size = len(remain_dataset) - train_size
-train_dataset, val_dataset = random_split(remain_dataset, [train_size, val_size])
+train_size = int(0.8 * len(dataset))
+val_size = len(dataset) - train_size
+train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
 # # Saving validation set
 # original_df = pd.read_csv(dataset_path)
@@ -54,7 +53,7 @@ train_dataset, val_dataset = random_split(remain_dataset, [train_size, val_size]
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size, False)
+# test_loader = DataLoader(test_dataset, batch_size, False)
 
 # Set device to GPU if available
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -151,7 +150,7 @@ plt.grid(True)
 plt.tight_layout()
 
 # Save the plot as an image file
-curve_path = output_path + "loss_curve.png"
+curve_path = output_path + "-loss_curve.png"
 plt.savefig(curve_path)
 plt.show()
 
@@ -180,6 +179,8 @@ plt.close()
 # print(confusion_matrix(all_labels, all_predictions))
 
 # Testing
+test_dataset = LyricsDataset(csv_file=test_set_path)
+test_loader = DataLoader(test_dataset, batch_size, False)
 correct = 0
 all_labels = []
 all_predictions = []
@@ -194,10 +195,11 @@ with torch.no_grad():
         all_predictions.extend(predicted.cpu().numpy()) 
 accuracy = correct / len(test_loader.dataset)
 print(f"Testing Accuracy: {accuracy:.4f}")
-print()
-print("Testing")
-print(classification_report(all_labels, all_predictions, target_names=dataset.genres))
-print(confusion_matrix(all_labels, all_predictions))
+# print()
+# print("Testing")
+# print(classification_report(all_labels, all_predictions, target_names=dataset.genres))
+# print(confusion_matrix(all_labels, all_predictions))
+
 
 # Saving the model
 torch.save(best_model_state, output_path)
@@ -211,7 +213,7 @@ report = classification_report(
     )
 df = pd.DataFrame(report).transpose()
 
-report_path = output_path + "report.csv"
+report_path = output_path + "-report.csv"
 df.to_csv(report_path, index=True)
 
 # Assuming y_true and y_pred are your true labels and predictions
@@ -225,6 +227,6 @@ plt.ylabel('True Label')
 plt.xticks(rotation=45)
 plt.tight_layout()
 
-cm_path = output_path + "cm.png"
+cm_path = output_path + "-cm.png"
 plt.savefig(cm_path)
 plt.show()

@@ -3,11 +3,11 @@ from gensim import corpora
 from gensim.models import LdaModel
 import os
 
-num_topics = 2048
+num_topics = 128
 
 # Define file paths
-input_csv_path = 'dataset/genly3k_train.csv'
-lda_model_path = f'models/model{num_topics}/lda{num_topics}.model'
+input_csv_path = 'dataset/genly3k_full.csv'
+lda_model_path = f'models/model{num_topics}_full/lda{num_topics}.model'
 word_id_map = 'dataset/word-ids-index-1.txt'
 
 # Ensure the output directory exists
